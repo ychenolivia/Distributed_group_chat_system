@@ -19,7 +19,7 @@ var pmap2 = make(map[int]*net.TCPConn)
 var mmap = make(map[string]string)
 var nmap = make(map[string]string)
 
-func listen_client(ip_port string, num int) { //listen to the port
+func listen_client(ip_port string, num int) { //start to listen to the port
 	tcpAddr, _ := net.ResolveTCPAddr("tcp", ip_port)
 	tcpListener, err := net.ListenTCP("tcp", tcpAddr)
 	if err != nil {
@@ -45,7 +45,7 @@ func listen_client(ip_port string, num int) { //listen to the port
 
 }
 
-func add_receiver(current_connect *net.TCPConn) { //receive massage from connect
+func add_receiver(current_connect *net.TCPConn) { //receive massages from the channel
 	for {
 		byte_msg := make([]byte, 2048)
 		len, err := current_connect.Read(byte_msg) //read messsage from connect
@@ -60,7 +60,7 @@ func add_receiver(current_connect *net.TCPConn) { //receive massage from connect
 	}
 }
 
-func msg_broadcast(byte_msg []byte, key string) { //send message to all exist connect
+func msg_broadcast(byte_msg []byte, key string) { //send messages to all connected nodes
 	for _, con := range client_map {
 		_, err := con.Write(byte_msg)
 		if err != nil {
@@ -68,7 +68,7 @@ func msg_broadcast(byte_msg []byte, key string) { //send message to all exist co
 		}
 	}
 }
-func msg_receiver(self_connect *net.TCPConn) { // receive message from broadcast
+func msg_receiver(self_connect *net.TCPConn) { //receive messages
 	buff := make([]byte, 2048)
 	for {
 		len, err := self_connect.Read(buff)
@@ -83,7 +83,7 @@ func msg_receiver(self_connect *net.TCPConn) { // receive message from broadcast
 		remsg := string(buff[:len])
 		sremsg := strings.Split(remsg, "/")
 		flag := true
-		for key := range mmap { //check if the message have been received, the repetitive message will be ignored
+		for key := range mmap { //check if the message has been received
 			if key == sremsg[0] && mmap[key] == sremsg[1] {
 				flag = false
 				break
@@ -104,7 +104,7 @@ func msg_sender() { //send message
 			fmt.Println("input error")
 			continue
 		}
-		t := time.Now().Nanosecond() //add a timestamp for message
+		t := time.Now().Nanosecond() //add a timestamp for every message
 		ct := strconv.Itoa(t)
 		read_line_msg = []byte(login_name + " : " + string(read_line_msg) + "/" + ct)
 		for key := range pmap2 {
@@ -116,7 +116,7 @@ func msg_sender() { //send message
 
 	}
 }
-func connect(num int, port string) { //Constantly connect to other machines
+func connect(num int, port string) { //constantly connect to other nodes
 	for {
 		for key := range pmap {
 			addr := pmap[key] + ":" + port
@@ -131,7 +131,7 @@ func connect(num int, port string) { //Constantly connect to other machines
 			}
 
 		}
-		if len(pmap2) == num { //check if all of the people are here
+		if len(pmap2) == num { 
 			fmt.Println("Ready")
 			break
 		}
